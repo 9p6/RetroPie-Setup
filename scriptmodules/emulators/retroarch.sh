@@ -140,9 +140,6 @@ function configure_retroarch() {
 
     addUdevInputRules
 
-    # move / symlink the retroarch configuration
-    moveConfigDir "$home/.config/retroarch" "$configdir/all/retroarch"
-
     # move / symlink our old retroarch-joypads folder
     moveConfigDir "$configdir/all/retroarch-joypads" "$configdir/all/retroarch/autoconfig"
 
