@@ -82,18 +82,18 @@ function configure_dolphin() {
 
     local launch_prefix
     isPlatform "kms" && launch_prefix="XINIT-WM:"
-
-    addEmulator 0 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
-    addEmulator 1 "$md_id-gui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
-    addEmulator 0 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -e %ROM%"
-    addEmulator 1 "$md_id-gui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -b -e %ROM%"
+    
+    local dolphin_dir=$md_conf_root/gc/Config
+    addEmulator 0 "$md_id" "gc" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -u $dolphin_dir -e %ROM%"
+    addEmulator 1 "$md_id-gui" "gc" "$launch_prefix$md_inst/bin/dolphin-emu -u $dolphin_dir -b -e %ROM%"
+    addEmulator 0 "$md_id" "wii" "$launch_prefix$md_inst/bin/dolphin-emu-nogui -u $dolphin_dir -e %ROM%"
+    addEmulator 1 "$md_id-gui" "wii" "$launch_prefix$md_inst/bin/dolphin-emu -u $dolphin_dir -b -e %ROM%"
 
     addSystem "gc"
     addSystem "wii"
 
     [[ "$md_mode" == "remove" ]] && return
 
-    moveConfigDir "$home/.config/dolphin-emu" "$md_conf_root/gc/Config"
     mkUserDir "$md_conf_root/gc/Config"
     # preset a few options on a first installation
     if [[ ! -f "$md_conf_root/gc/Config/Dolphin.ini" ]]; then
