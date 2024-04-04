@@ -74,26 +74,20 @@ function install_scummvm() {
 function configure_scummvm() {
     mkRomDir "scummvm"
 
-    local dir
-    for dir in .config .local/share; do
-        moveConfigDir "$home/$dir/scummvm" "$md_conf_root/scummvm"
-    done
-
     # Create startup script
     rm -f "$romdir/scummvm/+Launch GUI.sh"
     local name="ScummVM"
     [[ "$md_id" == "scummvm-sdl1" ]] && name="ScummVM-SDL1"
+    local scummvm_conf=$md_conf_root/scummvm
+    local scummvm_ini=$scummvm_conf/scummvm.ini
     cat > "$romdir/scummvm/+Start $name.sh" << _EOF_
 #!/bin/bash
 game="\$1"
 pushd "$romdir/scummvm" >/dev/null
-if ! grep -qs extrapath "\$HOME/.config/scummvm/scummvm.ini"; then
-    params="--extrapath="$md_inst/extra""
-fi
-$md_inst/bin/scummvm --fullscreen \$params --joystick=0 "\$game"
+$md_inst/bin/scummvm -c "$scummvm_ini" --fullscreen \$params --joystick=0 "\$game"
 while read id desc; do
     echo "\$desc" > "$romdir/scummvm/\$id.svm"
-done < <($md_inst/bin/scummvm --list-targets | tail -n +3)
+done < <($md_inst/bin/scummvm -c "$scummvm_ini" --list-targets | tail -n +3)
 popd >/dev/null
 _EOF_
     chown $user:$user "$romdir/scummvm/+Start $name.sh"
@@ -101,4 +95,10 @@ _EOF_
 
     addEmulator 1 "$md_id" "scummvm" "bash $romdir/scummvm/+Start\ $name.sh %BASENAME%"
     addSystem "scummvm"
+
+    ! [ -e "$scummvm_ini" ] && cat << EOF > "$scummvm_ini"
+[scummvm]
+extrapath=$md_inst/extra
+savepath=$scummvm_conf/saves
+EOF
 }
