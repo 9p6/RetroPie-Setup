@@ -61,11 +61,18 @@ function install_dosbox() {
     md_ret_require="$md_inst/bin/dosbox"
 }
 
+function _write_dosbox_config() {
+    dosbox=$1 conf=$2
+    touch -- "$conf" &&
+    "$dosbox" -conf "$conf" \
+        -c "CONFIG -writeconf $conf" -c EXIT
+}
+
 function configure_dosbox() {
     local def=0
     local launcher_name="+Start DOSBox.sh"
     local needs_synth=0
-    local config_dir="$home/.$md_id"
+
     case "$md_id" in
         dosbox-sdl2)
             launcher_name="+Start DOSBox-SDL2.sh"
@@ -79,7 +86,6 @@ function configure_dosbox() {
             ;;
         dosbox-staging)
             launcher_name="+Start DOSBox-Staging.sh"
-            config_dir="$home/.config/dosbox"
             ;;
         *)
             return 1
@@ -88,13 +94,18 @@ function configure_dosbox() {
 
     mkRomDir "pc"
 
-    moveConfigDir "$config_dir" "$md_conf_root/pc"
-
     addEmulator "$def" "$md_id" "pc" "bash $romdir/pc/${launcher_name// /\\ } %ROM%"
     addSystem "pc"
 
     rm -f "$romdir/pc/$launcher_name"
     [[ "$md_mode" == "remove" ]] && return
+
+    local config_path=$md_conf_root/pc/$md_id.conf
+    if ! [ -f "$config_path" ]; then
+        export -f _write_dosbox_config
+        runuser -u "$user" -- bash -c '_write_dosbox_config "$@"' \
+            bash "$md_inst/bin/dosbox" "$config_path"
+    fi
 
     cat > "$romdir/pc/$launcher_name" << _EOF_
 #!/bin/bash
@@ -130,7 +141,7 @@ elif [[ "\${params[0]}" == *.sh ]]; then
     midi_synth stop
     exit
 elif [[ "\${params[0]}" == *.conf ]]; then
-    params=(-userconf -conf "\${params[@]}")
+    params=(-conf "\${params[@]}")
 else
     params+=(-exit)
 fi
@@ -139,14 +150,13 @@ fi
 [[ -n "\$DISPLAY" ]] && params+=(-fullscreen)
 
 midi_synth start
-"$md_inst/bin/dosbox" "\${params[@]}"
+$md_inst/bin/dosbox -conf $config_path "\${params[@]}"
 midi_synth stop
 _EOF_
     chmod +x "$romdir/pc/$launcher_name"
     chown $user:$user "$romdir/pc/$launcher_name"
 
     if [[ "$md_id" == "dosbox" || "$md_id" == "dosbox-sdl2" ]]; then
-        local config_path=$(su "$user" -c "\"$md_inst/bin/dosbox\" -printconf")
         if [[ -f "$config_path" ]]; then
             iniConfig " = " "" "$config_path"
             iniSet "usescancodes" "false"

@@ -68,7 +68,8 @@ function configure_dosbox-staging() {
         staging_output="openglnb"
     fi
 
-    local config_path=$(su "$user" -c "\"$md_inst/bin/dosbox\" -printconf")
+    local config_path=$md_conf_root/pc/$md_id.conf
+
     if [[ -f "$config_path" ]]; then
         iniConfig " = " "" "$config_path"
         if isPlatform "rpi"; then
