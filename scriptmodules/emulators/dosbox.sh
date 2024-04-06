@@ -62,9 +62,12 @@ function install_dosbox() {
 }
 
 function _write_dosbox_config() {
-    dosbox=$1 conf=$2
-    touch -- "$conf" &&
-    "$dosbox" -conf "$conf" \
+    local dosbox=$1 conf=$2
+    cat << EOF > "$conf" &&
+[mt32]
+romdir = ${conf%/*}/mt32-roms
+EOF
+    "$dosbox" -noprimaryconf -conf "$conf" \
         -c "CONFIG -writeconf $conf" -c EXIT
 }
 
@@ -148,9 +151,9 @@ fi
 
 # fullscreen when running in X
 [[ -n "\$DISPLAY" ]] && params+=(-fullscreen)
-
+# 
 midi_synth start
-$md_inst/bin/dosbox -conf $config_path "\${params[@]}"
+$md_inst/bin/dosbox -noprimaryconf -conf $config_path "\${params[@]}"
 midi_synth stop
 _EOF_
     chmod +x "$romdir/pc/$launcher_name"
