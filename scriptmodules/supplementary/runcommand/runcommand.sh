@@ -1238,8 +1238,8 @@ function show_launch() {
         # if using art look for images in paths for es art.
         images+=(
             "$HOME/RetroPie/roms/$SYSTEM/images/${ROM_BN}-image"
-            "$HOME/.emulationstation/downloaded_images/$SYSTEM/${ROM_BN}-image"
-            "$HOME/.emulationstation/downloaded_media/$SYSTEM/screenshots/${ROM_BN}"
+            "$CONFIGDIR/all/emulationstation/downloaded_images/$SYSTEM/${ROM_BN}-image"
+            "$CONFIGDIR/all/emulationstation/downloaded_media/$SYSTEM/screenshots/${ROM_BN}"
             "$HOME/RetroPie/roms/$SYSTEM/media/screenshots/${ROM_BN}"
         )
     fi

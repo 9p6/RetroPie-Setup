@@ -324,8 +324,8 @@ function _scrape_skyscraper() {
         # If we're saving to the ROM folder, then use relative paths in the gamelist
         flags+="relative,"
     else
-        params+=(-g "$home/.emulationstation/gamelists/$system")
-        params+=(-o "$home/.emulationstation/downloaded_media/$system")
+        params+=(-g "$configdir/all/emulationstation/gamelists/$system")
+        params+=(-o "$configdir/all/emulationstation/downloaded_media/$system")
     fi
 
     # If 2nd parameter is unset, use the configured scraping source, otherwise scrape from cache.
@@ -853,7 +853,7 @@ function _gui_generate_skyscraper() {
     help_strings_gen=(
         [1]="Game name format used in the EmulationStation game list. Available options:\n\n\ZbSource name\Zn: use the name returned by the scraper\n\ZbFilename\Zn: use the filename of the ROM as game name\n\nSkyscraper option: \Zb--flags forcefilename\Z0"
         [2]="Game name option to remove/keep the text found between '()' and '[]' in the ROMs filename.\n\nSkyscraper option: \Zb--flags nobrackets\Zn"
-        [3]="Choose to save the generated 'gamelist.xml' and media in the ROMs folder. Supported options:\n\n\ZbEnabled\Zn saves the 'gamelist.xml' in the ROMs folder and the media in the 'media' sub-folder.\n\n\ZbDisabled\Zn saves the 'gamelist.xml' in \Zu\$HOME/.emulationstation/gamelists/<system>\Zn and the media in \Zu\$HOME/.emulationstation/downloaded_media\Zn.\n\n\Zb\ZrNOTE\Zn: changing this option will not automatically copy the 'gamelist.xml' file and the media to the new location or remove the ones in the old location. You must do this manually.\n\nSkyscraper parameters: \Zb-g <gamelist>\Zn / \Zb-o <path>\Zn"
+        [3]="Choose to save the generated 'gamelist.xml' and media in the ROMs folder. Supported options:\n\n\ZbEnabled\Zn saves the 'gamelist.xml' in the ROMs folder and the media in the 'media' sub-folder.\n\n\ZbDisabled\Zn saves the 'gamelist.xml' in \Zu/opt/retropie/configs/.emulationstation/gamelists/<system>\Zn and the media in \Zu/opt/retropie/configs/.emulationstation/downloaded_media\Zn.\n\n\Zb\ZrNOTE\Zn: changing this option will not automatically copy the 'gamelist.xml' file and the media to the new location or remove the ones in the old location. You must do this manually.\n\nSkyscraper parameters: \Zb-g <gamelist>\Zn / \Zb-o <path>\Zn"
     )
 
     while true; do

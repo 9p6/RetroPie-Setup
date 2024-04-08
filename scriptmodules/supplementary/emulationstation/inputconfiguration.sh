@@ -61,7 +61,7 @@
 
 function inputconfiguration() {
 
-    local es_conf="$home/.emulationstation/es_temporaryinput.cfg"
+    local es_conf="/opt/retropie/configs/all/emulationstation/es_temporaryinput.cfg"
     declare -A mapping
 
     # check if we have the temporary input file

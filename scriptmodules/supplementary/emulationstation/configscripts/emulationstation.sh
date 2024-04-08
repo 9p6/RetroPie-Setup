@@ -10,9 +10,10 @@
 #
 
 function onstart_emulationstation_joystick() {
-    local es_conf="$home/.emulationstation/es_input.cfg"
+    local es_dir=/opt/retropie/configs/all/emulationstation
+    local es_conf=$es_dir/es_input.cfg
 
-    mkdir -p "$home/.emulationstation"
+    mkdir -p "$es_dir"
 
     if [[ ! -f "$es_conf" ]]; then
         echo "<inputList />" >"$es_conf"
@@ -69,7 +70,7 @@ function map_emulationstation_joystick() {
             return
             ;;
     esac
-    local es_conf="$home/.emulationstation/es_input.cfg"
+    local es_conf=/opt/retropie/configs/all/emulationstation/es_input.cfg
 
     # add or update element
     if [[ $(xmlstarlet sel -t -v "count(/inputList/inputConfig[@deviceGUID=\"$DEVICE_GUID\"]/input[@name=\"$key\"])" "$es_conf") -eq 0 ]]; then

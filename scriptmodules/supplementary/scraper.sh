@@ -72,9 +72,9 @@ function scrape_scraper() {
         img_dir="$romdir/$system/images"
         img_path="./images"
     else
-        gamelist="$home/.emulationstation/gamelists/$system/gamelist.xml"
-        img_dir="$home/.emulationstation/downloaded_images/$system"
-        img_path="~/.emulationstation/downloaded_images/$system"
+        gamelist="$configdir/all/emulationstation/gamelists/$system/gamelist.xml"
+        img_dir="$configdir/all/emulationstation/downloaded_images/$system"
+        img_path="$configdir/all/emulationstation/loaded_images/$system"
     fi
 
     local params=()

@@ -981,7 +981,7 @@ function iniFileEditor() {
 ## @param command command to run
 ## @param platform name of platform (used by es for scraping)
 ## @param theme name of theme to use
-## @brief Adds a system entry for Emulation Station (to /etc/emulationstation/es_systems.cfg).
+## @brief Adds a system entry for Emulation Station (to es_systems.cfg).
 function setESSystem() {
     local function
     for function in $(compgen -A function _add_system_); do

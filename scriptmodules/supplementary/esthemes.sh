@@ -26,7 +26,7 @@ function _has_pixel_pos_esthemes() {
     # get the version of emulationstation installed so we can check whether to show
     # themes that use the new pixel based positioning - we run as $user as the
     # emulationstation launch script will exit if run as root
-    local es_ver="$(sudo -u $user /usr/bin/emulationstation --help | grep -oP "Version \K[^,]+")"
+    local es_ver="$(runuser -u "$user" -- /usr/local/games/emulationstation-retropie --help | grep -oP "Version \K[^,]+")"
     # if emulationstation is newer than 2.10, enable pixel based themes
     compareVersions "$es_ver" ge "2.10" && pixel_pos=1
     echo "$pixel_pos"
@@ -59,21 +59,22 @@ function install_theme_esthemes() {
         name+="-$branch"
     fi
 
-    mkdir -p "/etc/emulationstation/themes"
-    gitPullOrClone "/etc/emulationstation/themes/$name" "https://github.com/$repo/es-theme-$theme.git" "$branch"
+    local themes_dir=$configdir/all/emulationstation/themes
+    mkUserDir "$themes_dir"
+    gitPullOrClone "$themes_dir/$name" "https://github.com/$repo/es-theme-$theme.git" "$branch"
 
     # apply any patches for themes broken due to ES fixes
     if [[ "$pixel_pos" == 1 && -f "$md_data/patch-$repo-$theme.diff" ]]; then
-        pushd "/etc/emulationstation/themes/$name"
+        pushd "$themes_dir/$name"
         applyPatch "$md_data/patch-$repo-$theme.diff"
         popd
     fi
 }
 
 function uninstall_theme_esthemes() {
-    local theme="$1"
-    if [[ -d "/etc/emulationstation/themes/$theme" ]]; then
-        rm -rf "/etc/emulationstation/themes/$theme"
+    local theme_dir=$configdir/all/emulationstation/themes/$1
+    if [[ -d "$theme_dir" ]]; then
+        rm -rf "$theme_dir"
     fi
 }
 
@@ -340,7 +341,8 @@ function gui_esthemes() {
         local status=()
         local default
 
-        local gallerydir="/etc/emulationstation/es-theme-gallery"
+        local es_dir=$configdir/all/emulationstation
+        local gallerydir=$es_dir/es-theme-gallery
         if [[ -d "$gallerydir" ]]; then
             status+=("i")
             options+=(G "View or Update Theme Gallery")
@@ -363,7 +365,7 @@ function gui_esthemes() {
                 name+=" ($branch)"
                 theme_dir+="-$branch"
             fi
-            if [[ -d "/etc/emulationstation/themes/$theme_dir" ]]; then
+            if [[ -d "$es_dir/themes/$theme_dir" ]]; then
                 status+=("i")
                 options+=("$i" "Update or Uninstall $name (installed)")
                 installed_themes+=("$theme $repo $branch")

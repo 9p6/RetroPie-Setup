@@ -43,7 +43,7 @@ _EOF_
             echo -e "kodi-standalone #auto\nemulationstation #auto" >>"$script"
             ;;
         es|*)
-            echo "emulationstation #auto" >>"$script"
+            echo "emulationstation-retropie #auto" >>"$script"
             ;;
     esac
     chown $user:$user "$script"

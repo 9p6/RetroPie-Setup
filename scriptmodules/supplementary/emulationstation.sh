@@ -30,11 +30,12 @@ function _update_hook_emulationstation() {
 
 function _sort_systems_emulationstation() {
     local field="$1"
-    cp "/etc/emulationstation/es_systems.cfg" "/etc/emulationstation/es_systems.cfg.bak"
+    local es_systems=$configdir/all/emulationstation/es_systems.cfg
+    cp -- "$es_systems" "$es_systems.bak"
     xmlstarlet sel -D -I \
         -t -m "/" -e "systemList" \
         -m "//system" -s A:T:U "$1" -c "." \
-        "/etc/emulationstation/es_systems.cfg.bak" >"/etc/emulationstation/es_systems.cfg"
+        "$es_systems.bak" > "$es_systems"
 }
 
 function _add_system_emulationstation() {
@@ -46,8 +47,8 @@ function _add_system_emulationstation() {
     local platform="$6"
     local theme="$7"
 
-    local conf="/etc/emulationstation/es_systems.cfg"
-    mkdir -p "/etc/emulationstation"
+    local conf=$configdir/all/emulationstation/es_systems.cfg
+    mkUserDir "${conf%/*}"
     if [[ ! -f "$conf" ]]; then
         echo "<systemList />" >"$conf"
     fi
@@ -74,20 +75,15 @@ function _add_system_emulationstation() {
             "$conf"
     fi
 
-    # alert the user if they have a custom es_systems.cfg which doesn't contain the system we are adding
-    local conf_local="$configdir/all/emulationstation/es_systems.cfg"
-    if [[ -f "$conf_local" ]] && [[ "$(xmlstarlet sel -t -v "count(/systemList/system[name='$name'])" "$conf_local")" -eq 0 ]]; then
-        md_ret_info+=("You have a custom override of the EmulationStation system config in:\n\n$conf_local\n\nYou will need to copy the updated $system config from $conf to your custom config for $system to show up in EmulationStation.")
-    fi
-
     _sort_systems_emulationstation "name"
 }
 
 function _del_system_emulationstation() {
     local fullname="$1"
     local name="$2"
-    if [[ -f /etc/emulationstation/es_systems.cfg ]]; then
-        xmlstarlet ed -L -P -d "/systemList/system[name='$name']" /etc/emulationstation/es_systems.cfg
+    local es_systems=$configdir/all/emulationstation/es_systems.cfg
+    if [ -f "$es_systems" ]; then
+        xmlstarlet ed -L -P -d "/systemList/system[name='$name']" "$es_systems"
     fi
 }
 
@@ -241,7 +237,7 @@ function copy_inputscripts_emulationstation() {
 }
 
 function install_launch_emulationstation() {
-    cat > /usr/bin/emulationstation << _EOF_
+    cat > /usr/local/games/emulationstation-retropie << _EOF_
 #!/bin/bash
 
 if [[ \$(id -u) -eq 0 ]]; then
@@ -261,13 +257,13 @@ export TTY="\${TTY:8:1}"
 
 clear
 tput civis
-"$md_inst/emulationstation.sh" "\$@"
+"$md_inst/emulationstation.sh" --home $configdir "\$@"
 if [[ \$? -eq 139 ]]; then
     dialog --cr-wrap --no-collapse --msgbox "Emulation Station crashed!\n\nIf this is your first boot of RetroPie - make sure you are using the correct image for your system.\n\\nCheck your rom file/folder permissions and if running on a Raspberry Pi, make sure your gpu_split is set high enough and/or switch back to using carbon theme.\n\nFor more help please use the RetroPie forum." 20 60 >/dev/tty
 fi
 tput cnorm
 _EOF_
-    chmod +x /usr/bin/emulationstation
+    chmod +x /usr/local/games/emulationstation-retropie
 
     if isPlatform "x11"; then
         mkdir -p /usr/local/share/{icons,applications}
@@ -275,7 +271,7 @@ _EOF_
         cat > /usr/local/share/applications/retropie.desktop << _EOF_
 [Desktop Entry]
 Type=Application
-Exec=gnome-terminal --full-screen --hide-menubar -e emulationstation
+Exec=gnome-terminal --full-screen --hide-menubar -e emulationstation-retropie
 Hidden=false
 NoDisplay=false
 X-GNOME-Autostart-enabled=true
@@ -295,16 +291,13 @@ function clear_input_emulationstation() {
 }
 
 function remove_emulationstation() {
-    rm -f "/usr/bin/emulationstation"
+    rm -f /usr/local/games/emulationstation-retropie
     if isPlatform "x11"; then
         rm -rfv "/usr/local/share/icons/retropie.svg" "/usr/local/share/applications/retropie.desktop"
     fi
 }
 
 function configure_emulationstation() {
-    # move the $home/emulationstation configuration dir and symlink it
-    moveConfigDir "$home/.emulationstation" "$configdir/all/emulationstation"
-
     [[ "$md_mode" == "remove" ]] && return
 
     # remove other emulation station if it's installed, so we don't end up with
@@ -321,7 +314,7 @@ function configure_emulationstation() {
 
     install_launch_emulationstation
 
-    mkdir -p "/etc/emulationstation"
+    mkdir -p "$configdir/all/emulationstation"
 
     # ensure we have a default theme
     rp_callModule esthemes install_theme
